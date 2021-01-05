@@ -10,7 +10,7 @@ var EQMap = L.map("map", {
 });
 
 // Add a tile layer
-L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+var map = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
     tileSize: 512,
     maxZoom: 18,
@@ -36,7 +36,7 @@ legend.onAdd = function (EQMap) {
 legend.addTo(EQMap);
 
 // Perform a GET request to the usgsUrl URL.
-d3.json(usgsUrl).then(function (data) {
+var seismic_activities = d3.json(usgsUrl).then(function (data) {
     //console.log(data);
     var earthquakes = data.features;
     //console.log(earthquakes);
@@ -50,7 +50,7 @@ d3.json(usgsUrl).then(function (data) {
         //console.log(lng);
         //console.log(lat);
         const lnglat = { lon: lng, lat: lat };
-        console.log(lnglat);
+        //console.log(lnglat);
 
         // Color each earthquake by magnitude and link radius of each circle marker to magnitude.
         color = "red";
@@ -78,9 +78,30 @@ d3.json(usgsUrl).then(function (data) {
         `);
         circle.addTo(EQMap);
     });
-
-
 });
 
+// Store our JSON API endpoint for all past 30 days earthquakes inside usgsUrl variable.
+var tectUrl = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_plates.json";
+console.log(tectUrl);
+// Perform a GET request to the tectUrl URL.
+var tectonic_plates = d3.json(tectUrl).then(function (data2) {
+    //console.log(data2);
+    var plates = data2.features;
+    console.log(plates);
+    plates.forEach((plate) => {
+        L.geoJson(plate, {
+            color: "grey",
+            weight: 1.5,
+        }).bindPopup(`<h1>Plate Name: ${plate.properties.PlateName}</h1>`).addTo(EQMap);
+    });
+});
 
-
+// Add the layer control to the map
+var baseMap = {
+    "Earthquakes": seismic_activities,
+    "Standard": map
+};
+var overlayMap = {
+    "Tectonic Plates": tectonic_plates
+};
+L.control.layers(baseMap, overlayMap).addTo(EQMap);
