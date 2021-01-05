@@ -79,7 +79,7 @@ var EQLayer = d3.json(usgsUrl).then(function (data) {
     });
 });
 
-// Store our JSON API endpoint for all past 30 days earthquakes inside usgsUrl variable.
+// Store our JSON API endpoint for all tectonic plates inside tectUrl variable.
 var tectUrl = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_plates.json";
 console.log(tectUrl);
 // Perform a GET request to the tectUrl URL.
