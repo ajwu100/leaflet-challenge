@@ -6,17 +6,17 @@ console.log(usgsUrl);
 // Create a map object
 var EQMap = L.map("map", {
     center: [20, 10],
-    zoom: 2
+    zoom: 2,
 });
 
 // Add a tile layer
-var map = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+var standard = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
     tileSize: 512,
     maxZoom: 18,
     zoomOffset: -1,
     id: "mapbox/streets-v11",
-    accessToken: API_KEY
+    accessToken: API_KEY,
 }).addTo(EQMap);
 
 var legend = L.control({ position: "bottomright" });
@@ -32,11 +32,10 @@ legend.onAdd = function (EQMap) {
     }
     return div;
 };
-
 legend.addTo(EQMap);
 
 // Perform a GET request to the usgsUrl URL.
-var seismic_activities = d3.json(usgsUrl).then(function (data) {
+var EQLayer = d3.json(usgsUrl).then(function (data) {
     //console.log(data);
     var earthquakes = data.features;
     //console.log(earthquakes);
@@ -84,10 +83,11 @@ var seismic_activities = d3.json(usgsUrl).then(function (data) {
 var tectUrl = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_plates.json";
 console.log(tectUrl);
 // Perform a GET request to the tectUrl URL.
-var tectonic_plates = d3.json(tectUrl).then(function (data2) {
+var PlateLayer = d3.json(tectUrl).then(function (data2) {
     //console.log(data2);
     var plates = data2.features;
     console.log(plates);
+
     plates.forEach((plate) => {
         L.geoJson(plate, {
             color: "grey",
@@ -96,12 +96,14 @@ var tectonic_plates = d3.json(tectUrl).then(function (data2) {
     });
 });
 
-// Add the layer control to the map
+// Add the layer control to the map.  Could not get to work.
+
 var baseMap = {
-    "Earthquakes": seismic_activities,
-    "Standard": map
+    Standard: standard,
 };
 var overlayMap = {
-    "Tectonic Plates": tectonic_plates
+    TectonicPlates: PlateLayer,
+    Earthquakes: EQLayer,
 };
+
 L.control.layers(baseMap, overlayMap).addTo(EQMap);
